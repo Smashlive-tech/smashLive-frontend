@@ -1,18 +1,21 @@
 import { Stack } from "expo-router";
-import "../global.css";
 export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen
-        name="welcome"
+        name="login"
         options={{ headerShown: false }}
       ></Stack.Screen>
       <Stack.Screen
-        name="(auth)"
+        name="signup"
         options={{ headerShown: false }}
       ></Stack.Screen>
       <Stack.Screen
-        name="(tabs)"
+        name="otp_login"
+        options={{ headerShown: false }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="forgotPassword"
         options={{ headerShown: false }}
       ></Stack.Screen>
     </Stack>
