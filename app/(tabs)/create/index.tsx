@@ -161,22 +161,24 @@ const CreateTournament: React.FC = () => {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-[#101622]">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-white dark:bg-[#101622]">
       {/* Header */}
-      <View className="flex-row items-center px-5 pt-3 mb-5">
+      <View className="flex-row items-center justify-between px-5 py-4">
+        {/* Back Button */}
         <TouchableOpacity
           onPress={handleBack}
           className="flex-row items-center"
         >
-          <Ionicons
-            name="arrow-back"
-            size={22}
-            color={isDark ? "#f5f5f5" : "#111"}
-          />
-          <Text className="ml-2 text-base font-medium text-gray-900 dark:text-gray-100">
-            Back
-          </Text>
+          <Ionicons name="arrow-back" size={22} color={"#111827"} />
         </TouchableOpacity>
+
+        {/* Centered Title */}
+        <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Create Tournament
+        </Text>
+
+        {/* Placeholder for symmetry */}
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView

@@ -143,7 +143,10 @@ const TournamentSection = ({
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-[#101622]">
+    <SafeAreaView
+      edges={["top"]}
+      className="flex-1 bg-background-light dark:bg-[#101622]"
+    >
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 20 }}

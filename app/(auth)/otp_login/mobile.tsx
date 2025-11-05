@@ -50,7 +50,10 @@ export default function PhoneScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
+    <SafeAreaView
+      edges={["top"]}
+      className="flex-1 bg-background-light dark:bg-background-dark"
+    >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1"
