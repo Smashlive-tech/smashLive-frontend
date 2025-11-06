@@ -182,7 +182,11 @@ const CreateTournament: React.FC = () => {
           onPress={handleBack}
           className="flex-row items-center"
         >
-          <Ionicons name="arrow-back" size={22} color={"#111827"} />
+          <Ionicons
+            name="arrow-back"
+            size={22}
+            color={isDark ? "#f9fafb" : "#111827"}
+          />
         </TouchableOpacity>
 
         <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -497,17 +501,18 @@ const CreateTournament: React.FC = () => {
         )}
 
         {/* Bottom Buttons */}
-        <View className="flex-row mt-8">
+        <View className="flex-row mt-8 gap-2 mb-8">
           {currentStep > 1 && (
             <TouchableOpacity
               onPress={handleBack}
-              className="flex-1 py-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1a2232] mr-3"
+              className="flex-1 py-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1a2232]"
             >
               <Text className="text-center text-gray-900 dark:text-gray-100 font-bold text-base">
                 Back
               </Text>
             </TouchableOpacity>
           )}
+
           <TouchableOpacity
             onPress={handleNext}
             className="flex-1 py-4 rounded-xl bg-blue-600"
