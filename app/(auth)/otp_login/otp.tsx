@@ -1,4 +1,3 @@
-import OTPInputView from "@twotalltotems/react-native-otp-input";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OtpCodeScreen() {
@@ -65,20 +65,33 @@ export default function OtpCodeScreen() {
           </View>
 
           <View className="items-center">
-            <OTPInputView
-              style={{ width: "80%", height: 80 }}
-              pinCount={6}
-              autoFocusOnLoad
-              codeInputFieldStyle={{
-                width: 45,
-                height: 55,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: otpError ? "#ef4444" : "#d1d5db",
-                color: "#000",
+            <OtpInput
+              numberOfDigits={6}
+              autoFocus={true}
+              onTextChange={() => setOtpError("")}
+              onFilled={handleVerify}
+              theme={{
+                containerStyle: {
+                  width: "80%",
+                  height: 80,
+                },
+                pinCodeContainerStyle: {
+                  width: 45,
+                  height: 55,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: otpError ? "#ef4444" : "#d1d5db",
+                  backgroundColor: "transparent",
+                },
+                pinCodeTextStyle: {
+                  color: "#000",
+                  fontSize: 18,
+                  fontWeight: "600",
+                },
+                focusStickStyle: {
+                  backgroundColor: "#0d59f2",
+                },
               }}
-              onCodeChanged={() => setOtpError("")}
-              onCodeFilled={handleVerify}
             />
           </View>
 
@@ -88,7 +101,7 @@ export default function OtpCodeScreen() {
             </Text>
           ) : null}
 
-          {/* verify button */}
+          {/* Verify button */}
           <View className="py-3 pb-4 mt-6">
             <TouchableOpacity
               onPress={() => handleVerify("")}
