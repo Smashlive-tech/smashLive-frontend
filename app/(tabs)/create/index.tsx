@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   ScrollView,
   Text,
   TextInput,
@@ -18,6 +20,8 @@ type TournamentForm = {
   description: string;
   contactName: string;
   contactPhone: string;
+  profilePic?: string;
+  sponsorPic?: string;
   venue: string;
   address: string;
   city: string;
@@ -37,14 +41,18 @@ const CreateTournament: React.FC = () => {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
+
   const [errors, setErrors] = useState<{
     [key in keyof TournamentForm]?: string;
   }>({});
+
   const [formData, setFormData] = useState<TournamentForm>({
     tournamentName: "",
     description: "",
     contactName: "",
     contactPhone: "",
+    profilePic: "",
+    sponsorPic: "",
     venue: "",
     address: "",
     city: "",
@@ -67,6 +75,7 @@ const CreateTournament: React.FC = () => {
     setFormData((prev) => ({ ...prev, [key]: value }));
     setErrors((prev) => ({ ...prev, [key]: "" }));
   };
+
   const validateStep = () => {
     const newErrors: { [key in keyof TournamentForm]?: string } = {};
 
@@ -75,6 +84,10 @@ const CreateTournament: React.FC = () => {
         newErrors.tournamentName = "Tournament name is required";
       if (!formData.description)
         newErrors.description = "Description is required";
+      if (!formData.profilePic)
+        newErrors.profilePic = "Profile picture is required";
+      if (!formData.sponsorPic)
+        newErrors.sponsorPic = "Sponsor picture is required";
       if (!formData.contactName)
         newErrors.contactName = "Contact name is required";
       if (!formData.contactPhone)
@@ -104,6 +117,7 @@ const CreateTournament: React.FC = () => {
       else Alert.alert("Success", "Tournament created successfully!");
     }
   };
+
   const handleBack = () => {
     if (currentStep > 1) setCurrentStep((prev) => prev - 1);
     else router.back();
@@ -164,7 +178,6 @@ const CreateTournament: React.FC = () => {
     <SafeAreaView edges={["top"]} className="flex-1 bg-white dark:bg-[#101622]">
       {/* Header */}
       <View className="flex-row items-center justify-between px-5 py-4">
-        {/* Back Button */}
         <TouchableOpacity
           onPress={handleBack}
           className="flex-row items-center"
@@ -172,12 +185,10 @@ const CreateTournament: React.FC = () => {
           <Ionicons name="arrow-back" size={22} color={"#111827"} />
         </TouchableOpacity>
 
-        {/* Centered Title */}
         <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Create Tournament
         </Text>
 
-        {/* Placeholder for symmetry */}
         <View style={{ width: 24 }} />
       </View>
 
@@ -228,12 +239,13 @@ const CreateTournament: React.FC = () => {
               value={formData.tournamentName}
               onChangeText={(t) => handleInputChange("tournamentName", t)}
             />
-            {errors.tournamentName && (
+            {errors.tournamentName ? (
               <Text className="text-red-500 text-sm mb-5">
                 {errors.tournamentName}
               </Text>
+            ) : (
+              <View className="mb-5" />
             )}
-            {!errors.tournamentName && <View className="mb-5" />}
 
             {/* Description */}
             <TextInput
@@ -248,12 +260,105 @@ const CreateTournament: React.FC = () => {
               value={formData.description}
               onChangeText={(t) => handleInputChange("description", t)}
             />
-            {errors.description && (
+            {errors.description ? (
               <Text className="text-red-500 text-sm mb-5">
                 {errors.description}
               </Text>
+            ) : (
+              <View className="mb-5" />
             )}
-            {!errors.description && <View className="mb-5" />}
+
+            {/* Profile Picture Upload */}
+            <TouchableOpacity
+              onPress={async () => {
+                const result = await ImagePicker.launchImageLibraryAsync({
+                  mediaTypes: ["images"],
+                  allowsEditing: true,
+                  aspect: [1, 1],
+                  quality: 0.8,
+                });
+                if (!result.canceled) {
+                  handleInputChange("profilePic", result.assets[0].uri);
+                }
+              }}
+              className={`h-16 border ${
+                errors.profilePic
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-700"
+              } rounded-xl px-4 flex-row items-center justify-between bg-white dark:bg-[#101622] mb-2`}
+            >
+              <Text
+                className="text-lg dark:text-gray-100"
+                style={{ color: "#9ca3af" }}
+              >
+                Upload Profile Picture
+              </Text>
+              {formData.profilePic ? (
+                <Image
+                  source={{ uri: formData.profilePic }}
+                  className="w-10 h-10 rounded-lg"
+                />
+              ) : (
+                <Ionicons
+                  name="cloud-upload-outline"
+                  size={22}
+                  color="#9ca3af"
+                />
+              )}
+            </TouchableOpacity>
+            {errors.profilePic ? (
+              <Text className="text-red-500 text-sm mb-5">
+                {errors.profilePic}
+              </Text>
+            ) : (
+              <View className="mb-5" />
+            )}
+
+            {/* Sponsor Picture Upload */}
+            <TouchableOpacity
+              onPress={async () => {
+                const result = await ImagePicker.launchImageLibraryAsync({
+                  mediaTypes: ["images"],
+                  allowsEditing: true,
+                  aspect: [1, 1],
+                  quality: 0.8,
+                });
+                if (!result.canceled) {
+                  handleInputChange("sponsorPic", result.assets[0].uri);
+                }
+              }}
+              className={`h-16 border ${
+                errors.sponsorPic
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-700"
+              } rounded-xl px-4 flex-row items-center justify-between bg-white dark:bg-[#101622] mb-2`}
+            >
+              <Text
+                className="text-lg  dark:text-gray-100"
+                style={{ color: "#9ca3af" }}
+              >
+                Upload Sponsor Picture
+              </Text>
+              {formData.sponsorPic ? (
+                <Image
+                  source={{ uri: formData.sponsorPic }}
+                  className="w-10 h-10 rounded-lg"
+                />
+              ) : (
+                <Ionicons
+                  name="cloud-upload-outline"
+                  size={22}
+                  color="#9ca3af"
+                />
+              )}
+            </TouchableOpacity>
+            {errors.sponsorPic ? (
+              <Text className="text-red-500 text-sm mb-5">
+                {errors.sponsorPic}
+              </Text>
+            ) : (
+              <View className="mb-5" />
+            )}
 
             {/* Contact Name */}
             <TextInput
@@ -267,12 +372,13 @@ const CreateTournament: React.FC = () => {
               value={formData.contactName}
               onChangeText={(t) => handleInputChange("contactName", t)}
             />
-            {errors.contactName && (
+            {errors.contactName ? (
               <Text className="text-red-500 text-sm mb-5">
                 {errors.contactName}
               </Text>
+            ) : (
+              <View className="mb-5" />
             )}
-            {!errors.contactName && <View className="mb-5" />}
 
             {/* Contact Phone */}
             <TextInput
@@ -287,12 +393,13 @@ const CreateTournament: React.FC = () => {
               value={formData.contactPhone}
               onChangeText={(t) => handleInputChange("contactPhone", t)}
             />
-            {errors.contactPhone && (
+            {errors.contactPhone ? (
               <Text className="text-red-500 text-sm mb-5">
                 {errors.contactPhone}
               </Text>
+            ) : (
+              <View className="mb-5" />
             )}
-            {!errors.contactPhone && <View className="mb-5" />}
           </>
         )}
 
@@ -322,7 +429,6 @@ const CreateTournament: React.FC = () => {
                     handleInputChange(f as keyof TournamentForm, t)
                   }
                 />
-
                 {errors[f as keyof TournamentForm] ? (
                   <Text className="text-red-500 text-sm mb-5">
                     {errors[f as keyof TournamentForm]}
@@ -364,7 +470,6 @@ const CreateTournament: React.FC = () => {
                     handleInputChange(f as keyof TournamentForm, t)
                   }
                 />
-
                 {errors[f as keyof TournamentForm] ? (
                   <Text className="text-red-500 text-sm mb-5">
                     {errors[f as keyof TournamentForm]}
