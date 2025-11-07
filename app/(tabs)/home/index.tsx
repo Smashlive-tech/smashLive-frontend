@@ -1,4 +1,5 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
   FlatList,
@@ -142,6 +143,7 @@ const TournamentSection = ({
 );
 
 export default function HomeScreen() {
+  const router = useRouter();
   return (
     <SafeAreaView
       edges={["top"]}
@@ -174,6 +176,7 @@ export default function HomeScreen() {
             {/* History Button */}
             <Pressable
               className="w-[32%] rounded-xl bg-white dark:bg-white border border-zinc-200 dark:border-zinc-800 p-5 items-center shadow-sm"
+              onPress={() => router.push("/(tabs)/tournaments")}
               android_ripple={{
                 color: Platform.OS === "android" ? "#00000022" : undefined,
               }}
@@ -187,13 +190,18 @@ export default function HomeScreen() {
             {/* Players Button */}
             <Pressable
               className="w-[32%] rounded-xl bg-white dark:bg-white border border-zinc-200 dark:border-zinc-800 p-5 items-center shadow-sm"
+              onPress={() => router.push("/payments")}
               android_ripple={{
                 color: Platform.OS === "android" ? "#00000022" : undefined,
               }}
             >
-              <MaterialIcons name="groups" size={30} color="#0047D4" />
+              <MaterialIcons
+                name="account-balance-wallet"
+                size={30}
+                color="#0047D4"
+              />
               <Text className="text-sm font-semibold text-zinc-900 dark:text-black mt-2">
-                Players
+                Payments
               </Text>
             </Pressable>
 
