@@ -88,17 +88,14 @@ export default function PaymentsScreen() {
     if (isSelectingStartDate) {
       setStartDate(date);
       setIsSelectingStartDate(false);
+      setDatePickerVisible(false);
 
-      // Show a toast hint for Android
-      if (Platform.OS === "android") {
-        ToastAndroid.show("Select End Date", ToastAndroid.SHORT);
-      }
-
-      // Reopen for end date (Android requires delay)
-      if (Platform.OS === "android") {
-        setDatePickerVisible(false);
-        setTimeout(() => setDatePickerVisible(true), 400);
-      }
+      setTimeout(() => {
+        if (Platform.OS === "android") {
+          ToastAndroid.show("Select End Date", ToastAndroid.SHORT);
+        }
+        setDatePickerVisible(true);
+      }, 600);
     } else {
       setEndDate(date);
       setSelectedDateRange(
@@ -258,25 +255,6 @@ export default function PaymentsScreen() {
         ))}
       </View>
 
-      {/* ===== Date Picker ===== */}
-      <DateTimePickerModal
-        isVisible={isDatePickerVisible}
-        mode="date"
-        onConfirm={handleDateConfirm}
-        onCancel={() => {
-          setDatePickerVisible(false);
-          setIsSelectingStartDate(true);
-        }}
-        minimumDate={!isSelectingStartDate && startDate ? startDate : undefined}
-        customHeaderIOS={() => (
-          <View className="items-center py-2">
-            <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {isSelectingStartDate ? "Select Start Date" : "Select End Date"}
-            </Text>
-          </View>
-        )}
-      />
-
       {/* ===== Transactions ===== */}
       <ScrollView
         className="flex-1 space-y-4 px-4"
@@ -357,6 +335,29 @@ export default function PaymentsScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+
+      {/* ===== Date Picker (outside scroll, safe) ===== */}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        date={
+          isSelectingStartDate ? startDate || new Date() : endDate || new Date()
+        }
+        onConfirm={handleDateConfirm}
+        onCancel={() => {
+          setDatePickerVisible(false);
+          setIsSelectingStartDate(true);
+        }}
+        minimumDate={!isSelectingStartDate && startDate ? startDate : undefined}
+        themeVariant={isDark ? "dark" : "light"}
+        customHeaderIOS={() => (
+          <View className="items-center py-2">
+            <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              {isSelectingStartDate ? "Select Start Date" : "Select End Date"}
+            </Text>
+          </View>
+        )}
+      />
     </SafeAreaView>
   );
 }

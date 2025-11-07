@@ -508,7 +508,7 @@ const CreateTournament: React.FC = () => {
               className="flex-1 py-4 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1a2232]"
             >
               <Text className="text-center text-gray-900 dark:text-gray-100 font-bold text-base">
-                Back
+                Back1
               </Text>
             </TouchableOpacity>
           )}
