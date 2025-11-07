@@ -84,12 +84,14 @@ export default function PaymentsScreen() {
     }
   };
 
+  // ✅ Fixed and crash-safe date confirm handler
   const handleDateConfirm = (date: Date) => {
     if (isSelectingStartDate) {
       setStartDate(date);
       setIsSelectingStartDate(false);
       setDatePickerVisible(false);
 
+      // ✅ Delay toast & modal reopen to avoid native crash on Android
       setTimeout(() => {
         if (Platform.OS === "android") {
           ToastAndroid.show("Select End Date", ToastAndroid.SHORT);
@@ -340,9 +342,6 @@ export default function PaymentsScreen() {
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
-        date={
-          isSelectingStartDate ? startDate || new Date() : endDate || new Date()
-        }
         onConfirm={handleDateConfirm}
         onCancel={() => {
           setDatePickerVisible(false);
