@@ -7,6 +7,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
 import { OtpInput } from "react-native-otp-entry";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -47,7 +48,8 @@ export default function OtpCodeScreen() {
     setTimer(30); // restart timer
     setOtpError("");
   };
-
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === "dark";
   return (
     <SafeAreaView
       edges={["top"]}
@@ -84,7 +86,7 @@ export default function OtpCodeScreen() {
                   backgroundColor: "transparent",
                 },
                 pinCodeTextStyle: {
-                  color: "#000",
+                  color: isDarkMode ? "#fff" : "#000",
                   fontSize: 18,
                   fontWeight: "600",
                 },
