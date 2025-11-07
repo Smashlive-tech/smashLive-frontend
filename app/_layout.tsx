@@ -19,6 +19,14 @@ export default function RootLayout() {
         name="payments"
         options={{ headerShown: false }}
       ></Stack.Screen>
+      <Stack.Screen
+        name="profile"
+        options={{ headerShown: false }}
+      ></Stack.Screen>
+      <Stack.Screen
+        name="schedule"
+        options={{ headerShown: false }}
+      ></Stack.Screen>
     </Stack>
   );
 }

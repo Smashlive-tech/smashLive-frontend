@@ -23,16 +23,15 @@ export default function PaymentsScreen() {
   const [activeTab, setActiveTab] = useState("Income");
   const [selectedFilter, setSelectedFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [selectedDateRange, setSelectedDateRange] = useState<string | null>(
-    null
-  );
-  const [selectedTournament, setSelectedTournament] = useState<string>("All");
 
-  // Date Picker States
-  const [isDatePickerVisible, setDatePickerVisible] = useState(false);
-  const [isSelectingStartDate, setIsSelectingStartDate] = useState(true);
+  // Date range state
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [selectedTournament, setSelectedTournament] = useState<string>("All");
+
+  // Date pickers (separate controls to avoid Android crash from rapid reopen)
+  const [isStartPickerVisible, setStartPickerVisible] = useState(false);
+  const [isEndPickerVisible, setEndPickerVisible] = useState(false);
 
   const tabs = ["Income", "Refunds", "Payouts"];
   const filters = ["Date Range", "Tournament"];
@@ -84,36 +83,83 @@ export default function PaymentsScreen() {
     }
   };
 
-  // ✅ Fixed and crash-safe date confirm handler
-  const handleDateConfirm = (date: Date) => {
-    if (isSelectingStartDate) {
-      setStartDate(date);
-      setIsSelectingStartDate(false);
-      setDatePickerVisible(false);
+  // Helpers for presets
+  const applyLastDays = (days: number) => {
+    const now = new Date();
+    const start = new Date(now);
+    start.setDate(now.getDate() - (days - 1));
+    // Normalize time to start of day for start and end of day for end
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(now);
+    end.setHours(23, 59, 59, 999);
+    setStartDate(start);
+    setEndDate(end);
+    setSelectedFilter(null);
+  };
 
-      // ✅ Delay toast & modal reopen to avoid native crash on Android
-      setTimeout(() => {
-        if (Platform.OS === "android") {
-          ToastAndroid.show("Select End Date", ToastAndroid.SHORT);
-        }
-        setDatePickerVisible(true);
-      }, 600);
-    } else {
-      setEndDate(date);
-      setSelectedDateRange(
-        `${startDate?.toLocaleDateString()} - ${date.toLocaleDateString()}`
-      );
-      setDatePickerVisible(false);
-      setIsSelectingStartDate(true);
-      setSelectedFilter(null);
+  // Date picker confirm handlers
+  const handleConfirmStart = (date: Date) => {
+    setStartDate(date);
+    setStartPickerVisible(false);
+    // if end exists and end < start, clear end
+    if (endDate && endDate < date) {
+      setEndDate(null);
     }
   };
 
+  const handleConfirmEnd = (date: Date) => {
+    // if start exists and end < start, show toast and ignore
+    if (startDate && date < startDate) {
+      if (Platform.OS === "android") {
+        ToastAndroid.show(
+          "End date cannot be before start date",
+          ToastAndroid.SHORT
+        );
+      }
+      setEndPickerVisible(false);
+      return;
+    }
+    setEndDate(date);
+    setEndPickerVisible(false);
+    setSelectedFilter(null);
+  };
+
+  // Filtering: tournament + date range if both start & end set
   const filteredTransactions = transactions.filter((item) => {
-    if (selectedTournament !== "All" && item.tournament !== selectedTournament)
+    if (
+      selectedTournament !== "All" &&
+      item.tournament !== selectedTournament
+    ) {
       return false;
+    }
+
+    if (startDate && endDate) {
+      // Try to parse the transaction date safely
+      const txnDate = new Date(item.date);
+      if (isNaN(txnDate.getTime())) {
+        // If parsing fails, keep the item (or you may choose to drop)
+        return true;
+      }
+      // Compare inclusive. Normalize txn time to be comparable.
+      const txnTime = txnDate.getTime();
+      const startTime = new Date(startDate);
+      startTime.setHours(0, 0, 0, 0);
+      const endTime = new Date(endDate);
+      endTime.setHours(23, 59, 59, 999);
+      return txnTime >= startTime.getTime() && txnTime <= endTime.getTime();
+    }
+
     return true;
   });
+
+  // Format helper for header pill
+  const dateRangeLabel = () => {
+    if (startDate && endDate) {
+      return `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+    }
+    if (startDate && !endDate) return `From ${startDate.toLocaleDateString()}`;
+    return null;
+  };
 
   return (
     <SafeAreaView edges={["top"]} className="flex-1 bg-white dark:bg-[#101622]">
@@ -160,101 +206,159 @@ export default function PaymentsScreen() {
         ))}
       </View>
 
-      {/* ===== Filters ===== */}
-      <View className="flex flex-row flex-wrap gap-3 p-4">
-        {filters.map((filter) => (
-          <View key={filter}>
-            <TouchableOpacity
-              onPress={() =>
-                setSelectedFilter(selectedFilter === filter ? null : filter)
-              }
-              className="flex h-8 flex-row items-center justify-center gap-x-2 rounded-full bg-gray-200/60 dark:bg-gray-700/50 pl-4 pr-3"
-            >
-              <Text className="text-sm font-medium text-gray-800 dark:text-gray-200">
-                {filter === "Date Range" && selectedDateRange
-                  ? selectedDateRange
-                  : filter === "Tournament" && selectedTournament !== "All"
-                    ? selectedTournament
-                    : filter}
-              </Text>
-              <MaterialIcons
-                name={selectedFilter === filter ? "expand-less" : "expand-more"}
-                size={18}
-                color={isDark ? "#9ca3af" : "#4b5563"}
-              />
-            </TouchableOpacity>
+      {/* ===== Filters (container position: relative so dropdown absolute can anchor) ===== */}
+      <View className="px-4 pt-3 pb-1">
+        <View className="flex flex-row flex-wrap gap-3">
+          {filters.map((filter) => (
+            <View key={filter} style={{ position: "relative" }}>
+              <TouchableOpacity
+                onPress={() =>
+                  setSelectedFilter(selectedFilter === filter ? null : filter)
+                }
+                className="flex h-8 flex-row items-center justify-center gap-x-2 rounded-full bg-gray-200/60 dark:bg-gray-700/50 pl-4 pr-3"
+              >
+                <Text className="text-sm font-medium text-gray-800 dark:text-gray-200">
+                  {filter === "Date Range" && dateRangeLabel()
+                    ? dateRangeLabel()
+                    : filter === "Tournament" && selectedTournament !== "All"
+                      ? selectedTournament
+                      : filter}
+                </Text>
+                <MaterialIcons
+                  name={
+                    selectedFilter === filter ? "expand-less" : "expand-more"
+                  }
+                  size={18}
+                  color={isDark ? "#9ca3af" : "#4b5563"}
+                />
+              </TouchableOpacity>
 
-            {/* Dropdown options */}
-            {selectedFilter === filter && (
-              <View className="mt-2 ml-1 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1A2233] shadow-sm">
-                {filter === "Date Range" ? (
-                  <>
-                    <TouchableOpacity
-                      className="px-4 py-2"
-                      onPress={() => {
-                        setSelectedDateRange("Last 7 Days");
-                        setSelectedFilter(null);
-                      }}
-                    >
-                      <Text className="text-sm text-gray-700 dark:text-gray-200">
-                        Last 7 Days
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className="px-4 py-2"
-                      onPress={() => {
-                        setSelectedDateRange("Last 30 Days");
-                        setSelectedFilter(null);
-                      }}
-                    >
-                      <Text className="text-sm text-gray-700 dark:text-gray-200">
-                        Last 30 Days
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      className="px-4 py-2"
-                      onPress={() => {
-                        if (Platform.OS === "android") {
-                          ToastAndroid.show(
-                            "Select Start Date",
-                            ToastAndroid.SHORT
-                          );
-                        }
-                        setDatePickerVisible(true);
-                        setIsSelectingStartDate(true);
-                      }}
-                    >
-                      <Text className="text-sm text-gray-700 dark:text-gray-200">
-                        Custom Range
-                      </Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <>
-                    {[
-                      "All",
-                      "Summer Smash Fest 2024",
-                      "Apex Arena Championship",
-                    ].map((tournament) => (
-                      <TouchableOpacity
-                        key={tournament}
-                        className="px-4 py-2"
-                        onPress={() => {
-                          setSelectedTournament(tournament);
-                          setSelectedFilter(null);
-                        }}
-                      >
-                        <Text className="text-sm text-gray-700 dark:text-gray-200">
-                          {tournament}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </>
-                )}
-              </View>
-            )}
-          </View>
-        ))}
+              {/* Absolute dropdown to overlay cards (not push layout) */}
+              {selectedFilter === filter && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 44,
+                    left: 0,
+                    // keep width contained or stretch if you prefer
+                    minWidth: 220,
+                    zIndex: 1000,
+                    elevation: 20,
+                  }}
+                >
+                  <View className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1A2233] shadow-sm">
+                    {filter === "Date Range" ? (
+                      <>
+                        <TouchableOpacity
+                          className="px-4 py-2"
+                          onPress={() => {
+                            applyLastDays(7);
+                          }}
+                        >
+                          <Text className="text-sm text-gray-700 dark:text-gray-200">
+                            Last 7 Days
+                          </Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          className="px-4 py-2"
+                          onPress={() => {
+                            applyLastDays(30);
+                          }}
+                        >
+                          <Text className="text-sm text-gray-700 dark:text-gray-200">
+                            Last 30 Days
+                          </Text>
+                        </TouchableOpacity>
+
+                        {/* Custom Range: show two buttons which open separate pickers */}
+                        <View className="px-2 py-2 border-t border-gray-100 dark:border-gray-700">
+                          <TouchableOpacity
+                            className="px-4 py-2"
+                            onPress={() => {
+                              if (Platform.OS === "android") {
+                                ToastAndroid.show(
+                                  "Choose Start Date",
+                                  ToastAndroid.SHORT
+                                );
+                              }
+                              setStartPickerVisible(true);
+                            }}
+                          >
+                            <Text className="text-sm text-gray-700 dark:text-gray-200">
+                              Choose Start Date
+                            </Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            className="px-4 py-2"
+                            onPress={() => {
+                              if (!startDate) {
+                                if (Platform.OS === "android") {
+                                  ToastAndroid.show(
+                                    "Please choose a start date first",
+                                    ToastAndroid.SHORT
+                                  );
+                                }
+                                return;
+                              }
+                              if (Platform.OS === "android") {
+                                ToastAndroid.show(
+                                  "Choose End Date",
+                                  ToastAndroid.SHORT
+                                );
+                              }
+                              setEndPickerVisible(true);
+                            }}
+                          >
+                            <Text className="text-sm text-gray-700 dark:text-gray-200">
+                              Choose End Date
+                            </Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            className="px-4 py-2"
+                            onPress={() => {
+                              // clear range
+                              setStartDate(null);
+                              setEndDate(null);
+                              setSelectedFilter(null);
+                            }}
+                          >
+                            <Text className="text-sm text-red-600 dark:text-red-400">
+                              Clear Range
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    ) : (
+                      <>
+                        {[
+                          "All",
+                          "Summer Smash Fest 2024",
+                          "Apex Arena Championship",
+                        ].map((tournament) => (
+                          <TouchableOpacity
+                            key={tournament}
+                            className="px-4 py-2"
+                            onPress={() => {
+                              setSelectedTournament(tournament);
+                              setSelectedFilter(null);
+                            }}
+                          >
+                            <Text className="text-sm text-gray-700 dark:text-gray-200">
+                              {tournament}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </>
+                    )}
+                  </View>
+                </View>
+              )}
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* ===== Transactions ===== */}
@@ -338,24 +442,27 @@ export default function PaymentsScreen() {
         </View>
       </KeyboardAvoidingView>
 
-      {/* ===== Date Picker (outside scroll, safe) ===== */}
+      {/* ===== Separate Date Pickers (no auto-reopen) ===== */}
       <DateTimePickerModal
-        isVisible={isDatePickerVisible}
+        isVisible={isStartPickerVisible}
         mode="date"
-        onConfirm={handleDateConfirm}
-        onCancel={() => {
-          setDatePickerVisible(false);
-          setIsSelectingStartDate(true);
-        }}
-        minimumDate={!isSelectingStartDate && startDate ? startDate : undefined}
+        date={startDate ?? new Date()}
+        onConfirm={handleConfirmStart}
+        onCancel={() => setStartPickerVisible(false)}
+        maximumDate={new Date(2100, 0, 1)}
         themeVariant={isDark ? "dark" : "light"}
-        customHeaderIOS={() => (
-          <View className="items-center py-2">
-            <Text className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {isSelectingStartDate ? "Select Start Date" : "Select End Date"}
-            </Text>
-          </View>
-        )}
+      />
+
+      <DateTimePickerModal
+        isVisible={isEndPickerVisible}
+        mode="date"
+        date={endDate ?? startDate ?? new Date()}
+        onConfirm={handleConfirmEnd}
+        onCancel={() => setEndPickerVisible(false)}
+        // ensure end can't be before start (UI hint)
+        minimumDate={startDate ?? undefined}
+        maximumDate={new Date(2100, 0, 1)}
+        themeVariant={isDark ? "dark" : "light"}
       />
     </SafeAreaView>
   );

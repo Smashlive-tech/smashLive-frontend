@@ -103,6 +103,7 @@ export default function SettingsScreen() {
           {/* Edit Profile */}
           <TouchableOpacity
             activeOpacity={0.8}
+            onPress={() => router.push("/profile")}
             className="flex-row items-center justify-between px-4 min-h-[60px] border-b border-gray-100 dark:border-gray-700/50"
           >
             <View className="flex-row items-center gap-4">
@@ -125,6 +126,7 @@ export default function SettingsScreen() {
           {/* Payment Settings */}
           <TouchableOpacity
             activeOpacity={0.8}
+            onPress={() => router.push("/payments")}
             className="flex-row items-center justify-between px-4 min-h-[60px]"
           >
             <View className="flex-row items-center gap-4">
@@ -132,7 +134,7 @@ export default function SettingsScreen() {
                 <MaterialIcons name="credit-card" size={22} color="#0d59f2" />
               </View>
               <Text className="text-gray-900 dark:text-white text-base font-medium leading-normal">
-                Payment Settings
+                Payments
               </Text>
             </View>
             <View className="flex size-7 items-center justify-center">
@@ -151,6 +153,7 @@ export default function SettingsScreen() {
           <TouchableOpacity
             activeOpacity={0.8}
             className="flex-row items-center justify-between px-4 min-h-[60px]"
+            onPress={() => router.push("/profile/help_support")}
           >
             <View className="flex-row items-center gap-4">
               <View className="bg-[#0d59f2]/20 rounded-lg size-10 items-center justify-center">
