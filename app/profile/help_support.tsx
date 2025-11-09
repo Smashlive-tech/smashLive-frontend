@@ -90,24 +90,8 @@ export default function HelpSupportScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 50 }}
       >
-        {/* ===== Search Bar ===== */}
-        <View className="mt-3 mb-8">
-          <View className="flex-row items-center rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/60 shadow-sm h-14">
-            <View className="pl-5 pr-3">
-              <MaterialIcons
-                name="search"
-                size={24}
-                color={isDark ? "#9ca3af" : "#6b7280"}
-              />
-            </View>
-            <Text className="text-gray-500 dark:text-gray-400 text-base">
-              Search for help
-            </Text>
-          </View>
-        </View>
-
         {/* ===== FAQ Section ===== */}
-        <View className="mb-8">
+        <View className="mb-8 mt-4">
           <Text className="text-xl font-bold text-gray-900 dark:text-white mb-4">
             Frequently Asked Questions
           </Text>
