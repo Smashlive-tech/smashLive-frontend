@@ -294,7 +294,7 @@ export default function SignUpScreen() {
               I agree to the{" "}
               <Text
                 className="text-primary font-semibold"
-                onPress={() => router.push("/terms")}
+                onPress={() => router.push("/terms-conditions")}
               >
                 Terms & Conditions
               </Text>

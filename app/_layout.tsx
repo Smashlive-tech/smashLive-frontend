@@ -27,6 +27,10 @@ export default function RootLayout() {
         name="schedule"
         options={{ headerShown: false }}
       ></Stack.Screen>
+      <Stack.Screen
+        name="terms-conditions"
+        options={{ headerShown: false }}
+      ></Stack.Screen>
     </Stack>
   );
 }
