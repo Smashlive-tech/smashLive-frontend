@@ -32,7 +32,6 @@ export default function LoginScreen() {
       temp.email = "Email or phone is required";
       valid = false;
     } else {
-      // check email or phone
       const isNumber = /^[0-9]+$/.test(email);
       if (isNumber) {
         if (email.length !== 10) {
@@ -55,8 +54,6 @@ export default function LoginScreen() {
 
     setErrors(temp);
     if (!valid) return;
-
-    // success
     router.replace("/(tabs)/home");
   };
 
@@ -67,24 +64,41 @@ export default function LoginScreen() {
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
         className="flex-1"
       >
-        <ScrollView className="flex-1 px-4 pb-0">
-          {/* Top Title */}
-          <View className="flex-row items-center justify-center p-4 pb-2">
-            <Text className="text-2xl font-bold text-gray-900 dark:text-white">
-              Sign In
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          className="flex-1 px-6 pt-14"
+        >
+          {/* Sign In Header */}
+          <View className="items-center mb-10">
+            <Text className="text-3xl font-bold text-gray-900 dark:text-white">
+              Welcome Back 👋
+            </Text>
+            <Text className="text-gray-500 dark:text-gray-400 text-base mt-2">
+              Sign in to continue
             </Text>
           </View>
 
-          {/* Form Inputs */}
-          <View className="pt-4">
-            {/* Email */}
-            <View className="mb-4">
-              <Text className="text-base font-medium pb-2 text-gray-800 dark:text-gray-200">
-                Email or Phone
-              </Text>
-
+          {/* Email Field */}
+          <View className="mb-3">
+            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ml-1">
+              Email or Phone
+            </Text>
+            <View
+              className={`flex-row items-center h-14 rounded-2xl border ${
+                errors.email
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-[#314368]"
+              } bg-white dark:bg-[#182234] px-4 shadow-sm`}
+            >
+              <MaterialCommunityIcons
+                name="email-outline"
+                size={22}
+                color="#9ca3af"
+              />
               <TextInput
                 value={email}
                 onChangeText={(v) => {
@@ -92,97 +106,96 @@ export default function LoginScreen() {
                   setErrors({ ...errors, email: "" });
                 }}
                 placeholder="Enter your email"
-                className={`h-14 w-full rounded-xl border ${
-                  errors.email
-                    ? "border-red-500"
-                    : "border-gray-300 dark:border-gray-700"
-                } bg-background-light dark:bg-background-dark p-[15px] text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+                placeholderTextColor="#9ca3af"
+                className="flex-1 pl-3 text-base text-gray-900 dark:text-white"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                returnKeyType="next"
               />
-              {errors.email ? (
-                <Text className="text-red-500 text-sm mt-1">
-                  {errors.email}
-                </Text>
-              ) : null}
             </View>
+            {errors.email ? (
+              <Text className="text-red-500 text-sm mt-1">{errors.email}</Text>
+            ) : null}
+          </View>
 
-            {/* Password */}
-            <View className="mb-2">
-              <Text className="text-base font-medium pb-2 text-gray-800 dark:text-gray-200">
-                Password
-              </Text>
-
-              <View className="relative justify-center">
-                <TextInput
-                  value={password}
-                  onChangeText={(v) => {
-                    setPassword(v);
-                    setErrors({ ...errors, password: "" });
-                  }}
-                  placeholder="Enter your password"
-                  secureTextEntry={!isPasswordVisible}
-                  className={`h-14 w-full rounded-xl border ${
-                    errors.password
-                      ? "border-red-500"
-                      : "border-gray-300 dark:border-gray-700"
-                  } bg-background-light dark:bg-background-dark p-[15px] pr-12 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500`}
+          {/* Password Field */}
+          <View className="mb-2">
+            <Text className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ml-1">
+              Password
+            </Text>
+            <View
+              className={`flex-row items-center h-14 rounded-2xl border ${
+                errors.password
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-[#314368]"
+              } bg-white dark:bg-[#182234] px-4 shadow-sm`}
+            >
+              <MaterialCommunityIcons
+                name="lock-outline"
+                size={22}
+                color="#9ca3af"
+              />
+              <TextInput
+                value={password}
+                onChangeText={(v) => {
+                  setPassword(v);
+                  setErrors({ ...errors, password: "" });
+                }}
+                placeholder="Enter your password"
+                placeholderTextColor="#9ca3af"
+                secureTextEntry={!isPasswordVisible}
+                className="flex-1 pl-3 text-base text-gray-900 dark:text-white"
+                returnKeyType="done"
+              />
+              <TouchableOpacity
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+              >
+                <MaterialCommunityIcons
+                  name={isPasswordVisible ? "eye" : "eye-off"}
+                  size={22}
+                  color="#9ca3af"
                 />
-
-                <TouchableOpacity
-                  onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-                  className="absolute right-4"
-                  style={{ top: 14 }}
-                >
-                  <MaterialCommunityIcons
-                    name={isPasswordVisible ? "eye" : "eye-off"}
-                    size={22}
-                    color="#6b7280"
-                  />
-                </TouchableOpacity>
-              </View>
-
-              {errors.password ? (
-                <Text className="text-red-500 text-sm mt-1">
-                  {errors.password}
-                </Text>
-              ) : null}
+              </TouchableOpacity>
             </View>
+            {errors.password ? (
+              <Text className="text-red-500 text-sm mt-1">
+                {errors.password}
+              </Text>
+            ) : null}
           </View>
 
           {/* Forgot Password */}
-          <View className="flex-row justify-end mb-6">
+          <View className="flex-row justify-end mb-5">
             <TouchableOpacity
               onPress={() => router.push("/(auth)/forgotPassword/email")}
             >
-              <Text className="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <Text className="text-sm font-medium text-primary">
                 Forgot Password?
               </Text>
             </TouchableOpacity>
           </View>
 
-          <View className="pb-4">
-            <TouchableOpacity
-              onPress={validate}
-              className="flex h-14 w-full items-center justify-center rounded-xl bg-primary mb-4"
-            >
-              <Text className="text-white font-bold text-base">Sign In</Text>
-            </TouchableOpacity>
+          {/* Buttons */}
+          <TouchableOpacity
+            onPress={validate}
+            className="flex h-14 w-full items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/30 mb-3"
+          >
+            <Text className="text-white font-bold text-base">Sign In</Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {
-                router.push("/(auth)/otp_login/mobile");
-              }}
-              className="flex h-14 w-full items-center justify-center rounded-xl border border-[#D1D1D6] bg-transparent"
-            >
-              <Text className="text-text-primary dark:text-white font-bold text-base">
-                Login with OTP
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={() => router.push("/(auth)/otp_login/mobile")}
+            className="flex h-14 w-full items-center justify-center rounded-2xl border border-gray-300 dark:border-[#314368] bg-transparent mb-5"
+          >
+            <Text className="text-gray-800 dark:text-white font-bold text-base">
+              Login with OTP
+            </Text>
+          </TouchableOpacity>
 
-          {/* Bottom redirect */}
-          <View className="mt-3">
+          {/* Bottom */}
+          <View className="mb-4">
             <Text className="text-center text-sm text-gray-600 dark:text-gray-400">
-              New Here?{" "}
+              New here?{" "}
               <Text
                 className="font-bold text-primary"
                 onPress={() => router.push("/(auth)/signup")}
