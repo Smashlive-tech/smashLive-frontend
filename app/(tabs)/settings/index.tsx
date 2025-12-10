@@ -171,6 +171,29 @@ export default function SettingsScreen() {
               />
             </View>
           </TouchableOpacity>
+          {/* Terms & Conditions */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => router.push("/terms-conditions")}
+            className="flex-row items-center justify-between px-4 min-h-[60px]"
+          >
+            <View className="flex-row items-center gap-4">
+              <View className="bg-[#0d59f2]/20 rounded-lg size-10 items-center justify-center">
+                <MaterialIcons name="description" size={24} color="#0d59f2" />
+              </View>
+              <Text className="text-gray-900 dark:text-white text-base font-medium">
+                Terms & Conditions
+              </Text>
+            </View>
+
+            <View className="flex size-7 items-center justify-center">
+              <MaterialIcons
+                name="chevron-right"
+                size={26}
+                color={isDark ? "#9ca3af" : "#6b7280"}
+              />
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* ===== Logout ===== */}
