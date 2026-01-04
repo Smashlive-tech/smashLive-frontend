@@ -1,3 +1,4 @@
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -6,9 +7,10 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { SwiperFlatList } from "react-native-swiper-flatlist";
+
 const { width } = Dimensions.get("window");
 
 const slides = [
@@ -36,41 +38,52 @@ const slides = [
   },
 ];
 
-const OrganizerOnboarding = () => {
+export default function OrganizerOnboarding() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const router = useRouter();
+  const isDark = useColorScheme() === "dark";
+
+  const primary = "#8AFF1A";
+  const muted = isDark ? "#9CA3AF" : "#475569";
+
   return (
-    <SafeAreaView className="flex-1 bg-background-light dark:bg-background-dark">
-      {/* Dots (Pagination) */}
+    <ScreenWrapper>
+      {/* ===== Pagination Dots ===== */}
       <View className="flex-row justify-center py-4">
         {slides.map((slide, index) => (
           <View
             key={slide.id}
-            className={`h-2 w-2 rounded-full mx-1 ${
-              currentIndex === index ? "bg-primary" : "bg-text-secondary/30"
-            }`}
+            className="h-2 w-2 rounded-full mx-1"
+            style={{
+              backgroundColor:
+                currentIndex === index
+                  ? primary
+                  : isDark
+                    ? "#374151"
+                    : "#CBD5E1",
+            }}
           />
         ))}
       </View>
 
-      {/* Swiper Component */}
+      {/* ===== Swiper ===== */}
       <SwiperFlatList
         autoplay
         autoplayDelay={3}
         autoplayLoop={false}
         onChangeIndex={({ index }) => setCurrentIndex(index)}
       >
-        {slides.map((slide, index) => (
+        {slides.map((slide) => (
           <View
             key={slide.id}
             style={{ width }}
-            className="flex-1 justify-between p-4"
+            className="flex-1 justify-between px-6"
           >
             {/* Spacer */}
-            <View className="h-12" />
+            <View className="h-10" />
 
             {/* Content */}
-            <View className="flex-1 items-center justify-center px-4">
+            <View className="flex-1 items-center justify-center">
               <ImageBackground
                 source={
                   typeof slide.image === "string"
@@ -80,13 +93,14 @@ const OrganizerOnboarding = () => {
                 resizeMode="contain"
                 className="w-full max-w-sm min-h-64 rounded-xl mb-8"
               />
+
               {/* Title */}
-              <Text className="text-text-primary dark:text-white text-3xl font-semibold text-center leading-tight max-w-xs mb-3">
+              <Text className="text-light-text dark:text-dark-text text-3xl font-bold text-center leading-tight mb-3">
                 {slide.title}
               </Text>
 
               {/* Description */}
-              <Text className="text-text-secondary dark:text-gray-400 text-lg text-center max-w-md leading-relaxed px-4">
+              <Text className="text-light-muted dark:text-dark-muted text-lg text-center leading-relaxed px-4">
                 {slide.description}
               </Text>
             </View>
@@ -94,39 +108,33 @@ const OrganizerOnboarding = () => {
         ))}
       </SwiperFlatList>
 
-      {/* Footer (Skip and Next/Start Button) */}
-      <View className="pb-4">
-        {/* Next or Get Started Button */}
+      {/* ===== Footer ===== */}
+      <View className="pb-6">
+        {/* Get Started Button */}
         {currentIndex === slides.length - 1 && (
-          <View className="px-4 py-3">
+          <View className="px-6 py-3">
             <TouchableOpacity
-              className="h-12 bg-primary rounded-xl items-center justify-center"
-              onPress={() => {
-                if (currentIndex === slides.length - 1) {
-                  router.replace("/(auth)/signup");
-                } else {
-                  setCurrentIndex((prev) => prev + 1);
-                }
-              }}
+              className="h-12 rounded-xl items-center justify-center"
+              style={{ backgroundColor: primary }}
+              onPress={() => router.replace("/(auth)/signup")}
+              activeOpacity={0.9}
             >
-              <Text className="text-white text-base font-bold tracking-[0.015em]">
+              <Text className="text-black font-bold text-base">
                 Get Started
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* Skip Link */}
-        <View className="pt-2 items-center">
+        {/* Skip */}
+        <View className="pt-2 items-center mb-10">
           <TouchableOpacity onPress={() => router.replace("/(auth)/signup")}>
-            <Text className="text-text-secondary dark:text-gray-400 text-sm font-medium">
+            <Text className="text-sm font-medium" style={{ color: muted }}>
               Skip
             </Text>
           </TouchableOpacity>
         </View>
       </View>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
-};
-
-export default OrganizerOnboarding;
+}

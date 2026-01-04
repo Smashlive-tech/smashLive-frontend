@@ -1,3 +1,4 @@
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -14,12 +15,13 @@ import {
   useColorScheme,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CreateEventScreen() {
   const router = useRouter();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useColorScheme() === "dark";
+
+  const PRIMARY = "#8AFF1A";
+  const MUTED = isDark ? "#9CA3AF" : "#475569";
 
   const [eventName, setEventName] = useState("");
   const [eventFormat, setEventFormat] = useState("");
@@ -28,7 +30,6 @@ export default function CreateEventScreen() {
   const [maxParticipants, setMaxParticipants] = useState("");
   const [bornAfter, setBornAfter] = useState("");
 
-  // dropdown state
   const [openFormat, setOpenFormat] = useState(false);
   const [openMatch, setOpenMatch] = useState(false);
   const [openLevel, setOpenLevel] = useState(false);
@@ -50,9 +51,9 @@ export default function CreateEventScreen() {
     if (!matchType) next.matchType = "Please select a match type.";
     if (!level) next.level = "Please select a level.";
 
-    if (!maxParticipants.trim())
+    if (!maxParticipants.trim()) {
       next.maxParticipants = "Enter max participants.";
-    else {
+    } else {
       const n = Number(maxParticipants);
       if (!Number.isFinite(n) || n <= 0 || !Number.isInteger(n)) {
         next.maxParticipants = "Enter a valid positive whole number.";
@@ -97,30 +98,19 @@ export default function CreateEventScreen() {
     }
   };
 
-  const bgInput = isDark ? "#2a3245" : "#f3f4f6";
-  const textColor = isDark ? "white" : "black";
-  const placeholderColor = isDark ? "#9ca3af" : "#6b7280";
-
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white dark:bg-[#101622]">
-      {/* ===== Header ===== */}
-      <View className="flex-row items-center justify-between px-5 py-4">
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons
-            name="arrow-back"
-            size={22}
-            color={isDark ? "#f9fafb" : "#111827"}
-          />
+    <ScreenWrapper>
+      {/* Header */}
+      <View className="flex-row items-center px-5 py-4">
+        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <Ionicons name="arrow-back" size={22} color={MUTED} />
         </TouchableOpacity>
-
-        <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <Text className="text-lg font-semibold text-light-text dark:text-dark-text">
           Create New Event
         </Text>
-
-        <View style={{ width: 24 }} />
       </View>
 
-      {/* ===== Keyboard-Aware Form ===== */}
+      {/* Form */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -129,14 +119,13 @@ export default function CreateEventScreen() {
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <ScrollView
             className="flex-1 px-5"
-            nestedScrollEnabled={true}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 80 }}
           >
-            <View className="bg-white dark:bg-[#1A2233] rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700">
+            <View className="bg-light-card dark:bg-dark-card rounded-2xl p-6 border border-light-border dark:border-dark-border">
               {/* Event Name */}
               <View className="mb-5">
-                <Text className="text-[15px] font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <Text className="font-semibold text-light-text dark:text-dark-text mb-2">
                   Event Name
                 </Text>
                 <TextInput
@@ -146,19 +135,15 @@ export default function CreateEventScreen() {
                     clearError("eventName");
                   }}
                   placeholder="Enter event name"
-                  placeholderTextColor={placeholderColor}
-                  style={{
-                    backgroundColor: bgInput,
-                    color: textColor,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    borderWidth: errors.eventName ? 1.5 : 0,
-                    borderColor: errors.eventName ? "#ef4444" : "transparent",
-                  }}
+                  placeholderTextColor={isDark ? "#9CA3AF" : "#475569"}
+                  className={`h-16 border ${
+                    errors.eventName
+                      ? "border-red-500"
+                      : "border-light-border dark:border-dark-border"
+                  } rounded-xl px-4 text-lg text-light-text dark:text-dark-text bg-light-card dark:bg-dark-card`}
                 />
                 {errors.eventName && (
-                  <Text className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  <Text className="text-sm text-red-500 mt-2">
                     {errors.eventName}
                   </Text>
                 )}
@@ -166,9 +151,10 @@ export default function CreateEventScreen() {
 
               {/* Event Format */}
               <View className="mb-5 z-50">
-                <Text className="text-[15px] font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <Text className="font-semibold text-light-text dark:text-dark-text mb-2">
                   Event Format
                 </Text>
+
                 <DropDownPicker
                   open={openFormat}
                   value={eventFormat}
@@ -185,23 +171,58 @@ export default function CreateEventScreen() {
                     { label: "Swiss Format", value: "Swiss Format" },
                   ]}
                   setOpen={setOpenFormat}
-                  listMode="SCROLLVIEW"
                   setValue={setEventFormat}
+                  listMode="SCROLLVIEW"
                   placeholder="Select format"
-                  placeholderStyle={{ color: placeholderColor }}
+                  placeholderStyle={{ color: isDark ? "#9CA3AF" : "#475569" }}
+                  /* SAME AS TextInput */
                   style={{
-                    backgroundColor: bgInput,
-                    borderColor: errors.eventFormat ? "#ef4444" : "transparent",
+                    height: 60, // h-16
+                    borderWidth: 1,
+                    borderColor: errors.eventFormat
+                      ? "#EF4444"
+                      : isDark
+                        ? "#262626" // dark:border-dark-border
+                        : "#E5E7EB", // border-light-border
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    backgroundColor: isDark
+                      ? "#151515" // dark:bg-dark-card
+                      : "#F8FAFC", // bg-light-card
                   }}
-                  textStyle={{ color: textColor }}
+                  labelStyle={{
+                    fontSize: 18, // text-lg
+                    color: isDark
+                      ? "#FFFFFF" // dark:text-dark-text
+                      : "#0F172A", // text-light-text
+                  }}
                   dropDownContainerStyle={{
-                    backgroundColor: bgInput,
-                    borderColor: "#4b5563",
+                    backgroundColor: isDark ? "#151515" : "#F8FAFC",
+                    borderColor: isDark ? "#262626" : "#E5E7EB",
                   }}
+                  listItemLabelStyle={{
+                    fontSize: 15,
+                    color: isDark ? "#FFFFFF" : "#0F172A",
+                  }}
+                  ArrowDownIconComponent={() => (
+                    <Ionicons
+                      name="chevron-down"
+                      size={18}
+                      color={isDark ? "#9CA3AF" : "#475569"}
+                    />
+                  )}
+                  ArrowUpIconComponent={() => (
+                    <Ionicons
+                      name="chevron-up"
+                      size={18}
+                      color={isDark ? "#9CA3AF" : "#475569"}
+                    />
+                  )}
                   onChangeValue={() => clearError("eventFormat")}
                 />
+
                 {errors.eventFormat && (
-                  <Text className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  <Text className="text-sm text-red-500 mt-2">
                     {errors.eventFormat}
                   </Text>
                 )}
@@ -209,9 +230,10 @@ export default function CreateEventScreen() {
 
               {/* Match Type */}
               <View className="mb-5 z-40">
-                <Text className="text-[15px] font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <Text className="font-semibold text-light-text dark:text-dark-text mb-2">
                   Match Type
                 </Text>
+
                 <DropDownPicker
                   open={openMatch}
                   value={matchType}
@@ -222,24 +244,54 @@ export default function CreateEventScreen() {
                     { label: "Women's Doubles", value: "Women's Doubles" },
                     { label: "Mixed Doubles", value: "Mixed Doubles" },
                   ]}
-                  listMode="SCROLLVIEW"
                   setOpen={setOpenMatch}
                   setValue={setMatchType}
+                  listMode="SCROLLVIEW"
                   placeholder="Select match type"
-                  placeholderStyle={{ color: placeholderColor }}
+                  placeholderStyle={{ color: isDark ? "#9CA3AF" : "#475569" }}
                   style={{
-                    backgroundColor: bgInput,
-                    borderColor: errors.matchType ? "#ef4444" : "transparent",
+                    height: 60,
+                    borderWidth: 1,
+                    borderColor: errors.matchType
+                      ? "#EF4444"
+                      : isDark
+                        ? "#262626"
+                        : "#E5E7EB",
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    backgroundColor: isDark ? "#151515" : "#F8FAFC",
                   }}
-                  textStyle={{ color: textColor }}
+                  labelStyle={{
+                    fontSize: 18,
+                    color: isDark ? "#FFFFFF" : "#0F172A",
+                  }}
                   dropDownContainerStyle={{
-                    backgroundColor: bgInput,
-                    borderColor: "#4b5563",
+                    backgroundColor: isDark ? "#151515" : "#F8FAFC",
+                    borderColor: isDark ? "#262626" : "#E5E7EB",
                   }}
+                  listItemLabelStyle={{
+                    fontSize: 15,
+                    color: isDark ? "#FFFFFF" : "#0F172A",
+                  }}
+                  ArrowDownIconComponent={() => (
+                    <Ionicons
+                      name="chevron-down"
+                      size={18}
+                      color={isDark ? "#9CA3AF" : "#475569"}
+                    />
+                  )}
+                  ArrowUpIconComponent={() => (
+                    <Ionicons
+                      name="chevron-up"
+                      size={18}
+                      color={isDark ? "#9CA3AF" : "#475569"}
+                    />
+                  )}
                   onChangeValue={() => clearError("matchType")}
                 />
+
                 {errors.matchType && (
-                  <Text className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  <Text className="text-sm text-red-500 mt-2">
                     {errors.matchType}
                   </Text>
                 )}
@@ -247,9 +299,10 @@ export default function CreateEventScreen() {
 
               {/* Level */}
               <View className="mb-5 z-30">
-                <Text className="text-[15px] font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <Text className="font-semibold text-light-text dark:text-dark-text mb-2">
                   Level
                 </Text>
+
                 <DropDownPicker
                   open={openLevel}
                   value={level}
@@ -259,24 +312,54 @@ export default function CreateEventScreen() {
                     { label: "Expert", value: "Expert" },
                     { label: "Professional", value: "Professional" },
                   ]}
-                  listMode="SCROLLVIEW"
                   setOpen={setOpenLevel}
                   setValue={setLevel}
+                  listMode="SCROLLVIEW"
                   placeholder="Select level"
-                  placeholderStyle={{ color: placeholderColor }}
+                  placeholderStyle={{ color: isDark ? "#9CA3AF" : "#475569" }}
                   style={{
-                    backgroundColor: bgInput,
-                    borderColor: errors.level ? "#ef4444" : "transparent",
+                    height: 60,
+                    borderWidth: 1,
+                    borderColor: errors.level
+                      ? "#EF4444"
+                      : isDark
+                        ? "#262626"
+                        : "#E5E7EB",
+                    borderRadius: 12,
+                    paddingHorizontal: 16,
+                    backgroundColor: isDark ? "#151515" : "#F8FAFC",
                   }}
-                  textStyle={{ color: textColor }}
+                  labelStyle={{
+                    fontSize: 18,
+                    color: isDark ? "#FFFFFF" : "#0F172A",
+                  }}
                   dropDownContainerStyle={{
-                    backgroundColor: bgInput,
-                    borderColor: "#4b5563",
+                    backgroundColor: isDark ? "#151515" : "#F8FAFC",
+                    borderColor: isDark ? "#262626" : "#E5E7EB",
                   }}
+                  listItemLabelStyle={{
+                    fontSize: 15,
+                    color: isDark ? "#FFFFFF" : "#0F172A",
+                  }}
+                  ArrowDownIconComponent={() => (
+                    <Ionicons
+                      name="chevron-down"
+                      size={18}
+                      color={isDark ? "#9CA3AF" : "#475569"}
+                    />
+                  )}
+                  ArrowUpIconComponent={() => (
+                    <Ionicons
+                      name="chevron-up"
+                      size={18}
+                      color={isDark ? "#9CA3AF" : "#475569"}
+                    />
+                  )}
                   onChangeValue={() => clearError("level")}
                 />
+
                 {errors.level && (
-                  <Text className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  <Text className="text-sm text-red-500 mt-2">
                     {errors.level}
                   </Text>
                 )}
@@ -284,7 +367,7 @@ export default function CreateEventScreen() {
 
               {/* Max Participants */}
               <View className="mb-5">
-                <Text className="text-[15px] font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <Text className="font-semibold text-light-text dark:text-dark-text mb-2">
                   Max Participants
                 </Text>
                 <TextInput
@@ -293,31 +376,25 @@ export default function CreateEventScreen() {
                     setMaxParticipants(t);
                     clearError("maxParticipants");
                   }}
-                  placeholder="Enter max number of participants"
+                  placeholder="Enter max number"
                   keyboardType="numeric"
-                  placeholderTextColor={placeholderColor}
-                  style={{
-                    backgroundColor: bgInput,
-                    color: textColor,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    borderWidth: errors.maxParticipants ? 1.5 : 0,
-                    borderColor: errors.maxParticipants
-                      ? "#ef4444"
-                      : "transparent",
-                  }}
+                  placeholderTextColor={isDark ? "#9CA3AF" : "#475569"}
+                  className={`h-16 border ${
+                    errors.maxParticipants
+                      ? "border-red-500"
+                      : "border-light-border dark:border-dark-border"
+                  } rounded-xl px-4 text-lg text-light-text dark:text-dark-text bg-light-card dark:bg-dark-card`}
                 />
                 {errors.maxParticipants && (
-                  <Text className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  <Text className="text-sm text-red-500 mt-2">
                     {errors.maxParticipants}
                   </Text>
                 )}
               </View>
 
-              {/* Players Born After */}
+              {/* Born After */}
               <View>
-                <Text className="text-[15px] font-semibold text-gray-800 dark:text-gray-100 mb-2">
+                <Text className="font-semibold text-light-text dark:text-dark-text mb-2">
                   Players Born After (Optional)
                 </Text>
                 <TextInput
@@ -328,19 +405,15 @@ export default function CreateEventScreen() {
                   }}
                   placeholder="e.g. 2005"
                   keyboardType="numeric"
-                  placeholderTextColor={placeholderColor}
-                  style={{
-                    backgroundColor: bgInput,
-                    color: textColor,
-                    paddingHorizontal: 16,
-                    paddingVertical: 12,
-                    borderRadius: 8,
-                    borderWidth: errors.bornAfter ? 1.5 : 0,
-                    borderColor: errors.bornAfter ? "#ef4444" : "transparent",
-                  }}
+                  placeholderTextColor={isDark ? "#9CA3AF" : "#475569"}
+                  className={`h-16 border ${
+                    errors.bornAfter
+                      ? "border-red-500"
+                      : "border-light-border dark:border-dark-border"
+                  } rounded-xl px-4 text-lg text-light-text dark:text-dark-text bg-light-card dark:bg-dark-card`}
                 />
                 {errors.bornAfter && (
-                  <Text className="text-sm text-red-600 dark:text-red-400 mt-2">
+                  <Text className="text-sm text-red-500 mt-2">
                     {errors.bornAfter}
                   </Text>
                 )}
@@ -349,17 +422,18 @@ export default function CreateEventScreen() {
 
             {/* Create Button */}
             <TouchableOpacity
-              activeOpacity={0.85}
               onPress={handleCreateEvent}
-              className="bg-[#0d59f2] py-3 rounded-lg items-center justify-center mt-8 mb-8"
+              activeOpacity={0.85}
+              className="mt-8 mb-8 h-14 rounded-xl items-center justify-center"
+              style={{ backgroundColor: PRIMARY }}
             >
-              <Text className="text-white font-semibold text-[16px]">
+              <Text className="text-black font-bold text-base">
                 Create Event
               </Text>
             </TouchableOpacity>
           </ScrollView>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 }

@@ -1,3 +1,4 @@
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -10,13 +11,14 @@ import {
   View,
   useColorScheme,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function EventsScreen() {
   const router = useRouter();
   const { tournamentId } = useLocalSearchParams();
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const isDark = useColorScheme() === "dark";
+
+  const PRIMARY = "#8AFF1A";
+  const MUTED = isDark ? "#9CA3AF" : "#6B7280";
 
   const [activeTab, setActiveTab] = useState("Create");
   const [events, setEvents] = useState<any[]>([]);
@@ -24,7 +26,7 @@ export default function EventsScreen() {
 
   const tabs = ["Create", "Configure", "Schedule", "Live", "Complete"];
 
-  // ===== Mock Data =====
+  // ===== Mock Data (UNCHANGED) =====
   const fetchEvents = async (status: string) => {
     setLoading(true);
     await new Promise((r) => setTimeout(r, 400));
@@ -102,39 +104,32 @@ export default function EventsScreen() {
   }, [activeTab]);
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-white dark:bg-[#101622]">
-      {/* ===== Header ===== */}
-      <View className="flex-row items-center justify-between px-5 py-4">
-        <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons
-            name="arrow-back"
-            size={22}
-            color={isDark ? "#f9fafb" : "#111827"}
-          />
+    <ScreenWrapper>
+      {/* Header */}
+      <View className="flex-row items-center px-5 py-4">
+        <TouchableOpacity onPress={() => router.back()} className="mr-3">
+          <Ionicons name="arrow-back" size={22} color={MUTED} />
         </TouchableOpacity>
-
-        <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        <Text className="text-lg font-semibold text-light-text dark:text-dark-text">
           Events
         </Text>
-
-        <View style={{ width: 24 }} />
       </View>
 
-      {/* ===== Tabs ===== */}
-      <View className="flex-row border-b border-gray-200 dark:border-gray-700 px-4 justify-between mb-4">
+      {/* Tabs */}
+      <View className="flex-row justify-between border-b border-light-border dark:border-dark-border px-4 mb-4">
         {tabs.map((tab) => (
           <TouchableOpacity
             key={tab}
             onPress={() => setActiveTab(tab)}
-            className={`items-center justify-center border-b-[3px] ${
-              activeTab === tab ? "border-b-[#0d59f2]" : "border-b-transparent"
-            } pb-[13px] pt-4 mx-2`}
+            className={`pb-3 pt-4 border-b-[3px] ${
+              activeTab === tab ? "border-primary" : "border-transparent"
+            }`}
           >
             <Text
-              className={`text-m font-semibold leading-normal tracking-[0.015em] ${
+              className={`font-semibold ${
                 activeTab === tab
-                  ? "text-[#0d59f2]"
-                  : "text-gray-500 dark:text-gray-400"
+                  ? "text-primary"
+                  : "text-light-muted dark:text-dark-muted"
               }`}
             >
               {tab}
@@ -143,101 +138,56 @@ export default function EventsScreen() {
         ))}
       </View>
 
-      {/* ===== Main Content ===== */}
-      <ScrollView
-        className="flex-1 px-4"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      >
+      {/* Cards */}
+      <ScrollView className="flex-1 px-4" showsVerticalScrollIndicator={false}>
         {loading ? (
-          <View className="flex-1 items-center justify-center py-20">
-            <ActivityIndicator size="large" color="#0d59f2" />
+          <View className="items-center py-20">
+            <ActivityIndicator size="large" color={PRIMARY} />
           </View>
-        ) : events.length > 0 ? (
-          <>
-            {events.map((event) => (
-              <View
-                key={event.id}
-                className="flex flex-row items-center gap-5 bg-white dark:bg-[#1A2233] p-5 rounded-xl shadow-sm mb-3 border border-gray-100 dark:border-gray-700"
-              >
-                {/* Image */}
+        ) : (
+          events.map((event) => (
+            <View
+              key={event.id}
+              className="bg-light-card dark:bg-dark-card rounded-2xl mb-4 border border-light-border dark:border-dark-border"
+            >
+              <View className="flex-row gap-4 p-4 items-center">
                 <Image
                   source={{ uri: event.image }}
-                  className="w-16 h-16 rounded-lg bg-center"
-                  resizeMode="cover"
+                  className="w-20 h-20 rounded-xl"
                 />
 
-                {/* Info */}
-                <View className="flex-1 min-w-0">
-                  <View className="flex-row justify-between items-start gap-2">
-                    <Text className="text-[16px] font-semibold leading-normal text-gray-900 dark:text-gray-100 flex-1">
-                      {event.name}
-                    </Text>
-                    <View
-                      className={`rounded-full px-2.5 py-0.5 ${
-                        event.status === "Live"
-                          ? "bg-green-600"
-                          : event.status === "Scheduled"
-                            ? "bg-blue-500"
-                            : event.status === "Completed"
-                              ? "bg-orange-500"
-                              : event.status === "Configuring"
-                                ? "bg-yellow-500"
-                                : "bg-gray-500"
-                      }`}
-                    >
-                      <Text className="text-xs font-medium text-white">
-                        {event.status}
-                      </Text>
-                    </View>
-                  </View>
-                  <Text className="text-[14px] text-gray-600 dark:text-gray-400 mt-1">
+                <View className="flex-1">
+                  <Text className="font-semibold text-light-text dark:text-dark-text">
+                    {event.name}
+                  </Text>
+                  <Text className="text-sm text-light-muted dark:text-dark-muted mt-1">
                     {event.date}
                   </Text>
                 </View>
 
-                {/* Button */}
                 {activeTab !== "Create" && (
-                  <TouchableOpacity
-                    onPress={() => console.log("Action on:", event.name)}
-                    className="bg-[#0d59f2] rounded-lg h-10 px-5 items-center justify-center"
-                  >
-                    <Text className="text-white text-[15px] font-semibold">
+                  <TouchableOpacity className="bg-primary px-5 h-9 rounded-lg items-center justify-center">
+                    <Text className="text-black font-semibold text-sm">
                       {activeTab === "Configure" ? "Edit" : "Manage"}
                     </Text>
                   </TouchableOpacity>
                 )}
               </View>
-            ))}
-          </>
-        ) : (
-          <View className="flex flex-col items-center justify-center text-center py-16 px-4">
-            <Ionicons
-              name="calendar-outline"
-              size={48}
-              color={isDark ? "#9ca3af" : "#6b7280"}
-              style={{ marginBottom: 12 }}
-            />
-            <Text className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              No {activeTab} Events
-            </Text>
-            <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Start by creating a new event for this tournament.
-            </Text>
-          </View>
+            </View>
+          ))
         )}
       </ScrollView>
 
-      {/* Floating Add Button (only in Create tab) */}
+      {/* Floating Add */}
       {activeTab === "Create" && (
         <TouchableOpacity
-          activeOpacity={0.85}
-          className="absolute bottom-12 right-6 bg-[#0d59f2] rounded-full h-14 w-14 items-center justify-center shadow-lg active:scale-95"
-          onPress={() => router.push("/schedule/create_event")}
+          className="absolute bottom-12 right-6 h-14 w-14 rounded-full items-center justify-center shadow-lg"
+          style={{ backgroundColor: PRIMARY }}
+          onPress={() => router.push("/events/create_event")}
         >
-          <Ionicons name="add" size={30} color="#fff" />
+          <Ionicons name="add" size={30} color="#000" />
         </TouchableOpacity>
       )}
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 }

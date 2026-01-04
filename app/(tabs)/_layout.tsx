@@ -1,62 +1,70 @@
+import CustomTabBar from "@/components/CustomTabBar";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
-import { useColorScheme } from "react-native";
 
 export default function AppTabsLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === "dark";
-
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: isDark ? "#ffffff" : "#0047D4", // active white in dark
-        tabBarInactiveTintColor: isDark ? "#bbbbbb" : "#555",
-        tabBarStyle: {
-          backgroundColor: isDark ? "#101622" : "#ffffff",
-          borderTopColor: isDark ? "#1c1f27" : "#e5e5e5",
-        },
         headerShown: false,
       }}
+      tabBar={(props) => <CustomTabBar {...props} />}
     >
+      {/* ===== HOME ===== */}
       <Tabs.Screen
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" color={color} size={size} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
 
+      {/* ===== CREATE ===== */}
       <Tabs.Screen
         name="create"
         options={{
           title: "Create",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" color={color} size={size} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? "add-circle" : "add-circle-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
 
+      {/* ===== TOURNAMENTS ===== */}
       <Tabs.Screen
         name="tournaments"
         options={{
           title: "Tournaments",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="trophy-outline" color={color} size={size} />
+          tabBarIcon: ({ focused, color, size }) => (
+            <Ionicons
+              name={focused ? "trophy" : "trophy-outline"}
+              size={size}
+              color={color}
+            />
           ),
         }}
       />
 
+      {/* ===== SETTINGS ===== */}
       <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color, size }) => (
+          tabBarIcon: ({ focused, color, size }) => (
             <MaterialCommunityIcons
-              name="cog-outline"
-              color={color}
+              name={focused ? "cog" : "cog-outline"}
               size={size}
+              color={color}
             />
           ),
         }}

@@ -1,3 +1,4 @@
+import ScreenWrapper from "@/components/ScreenWrapper";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React from "react";
@@ -8,9 +9,9 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 type CardItem = {
   id: string;
@@ -19,7 +20,8 @@ type CardItem = {
   status: "live" | "scheduled" | "completed";
 };
 
-// Static data for the tournaments
+/* ================= DATA ================= */
+
 const ongoingData: CardItem[] = [
   {
     id: "1",
@@ -65,40 +67,41 @@ const finishedData: CardItem[] = [
   },
 ];
 
-// Tournament Card Component
+/* ================= CARD ================= */
+
 const TournamentCard = ({ item }: { item: CardItem }) => {
   let pillBg = "";
   let pillText = "";
 
   if (item.status === "live") {
-    pillBg = "bg-red-100";
-    pillText = "text-red-600";
+    pillBg = "bg-red-100 dark:bg-red-900/30";
+    pillText = "text-red-600 dark:text-red-400";
   } else if (item.status === "scheduled") {
-    pillBg = "bg-green-100";
-    pillText = "text-green-700";
+    pillBg = "bg-green-100 dark:bg-green-900/30";
+    pillText = "text-green-700 dark:text-green-400";
   } else {
-    pillBg = "bg-zinc-200";
-    pillText = "text-zinc-600";
+    pillBg = "bg-light-border dark:bg-dark-border";
+    pillText = "text-light-muted dark:text-dark-muted";
   }
-
+  const router = useRouter();
   return (
-    <View
-      className="mr-4 rounded-xl bg-white border border-zinc-200 shadow-sm"
-      style={{ width: 280, height: 210 }}
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => router.push(`/events/${item.id}`)}
+      className="mr-4 w-[280px] rounded-xl bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border shadow-sm"
     >
       <Image
         source={{ uri: "https://picsum.photos/600/400" }}
-        style={{
-          width: "100%",
-          height: 120,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-        }}
+        className="w-full h-[120px] rounded-t-xl"
       />
 
       <View className="p-3">
-        <Text className="text-base font-bold text-zinc-900 ">{item.title}</Text>
-        <Text className="text-sm text-zinc-500  mb-1">{item.subtitle}</Text>
+        <Text className="text-base font-bold text-light-text dark:text-dark-text">
+          {item.title}
+        </Text>
+        <Text className="text-sm text-light-muted dark:text-dark-muted mb-1">
+          {item.subtitle}
+        </Text>
 
         <View
           className={`self-start flex-row items-center rounded-full px-3 py-1 ${pillBg}`}
@@ -115,9 +118,11 @@ const TournamentCard = ({ item }: { item: CardItem }) => {
           </Text>
         </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
+
+/* ================= SECTION ================= */
 
 const TournamentSection = ({
   title,
@@ -127,7 +132,7 @@ const TournamentSection = ({
   data: CardItem[];
 }) => (
   <>
-    <Text className="px-4 pt-6 pb-3 text-[22px] font-bold tracking-[-0.015em] text-zinc-900 dark:text-white ml-2">
+    <Text className="px-4 pt-6 pb-3 text-[22px] font-bold text-light-text dark:text-dark-text">
       {title}
     </Text>
 
@@ -142,79 +147,69 @@ const TournamentSection = ({
   </>
 );
 
+/* ================= SCREEN ================= */
+
 export default function HomeScreen() {
   const router = useRouter();
+
   return (
-    <SafeAreaView
-      edges={["top"]}
-      className="flex-1 bg-background-light dark:bg-[#101622]"
-    >
+    <ScreenWrapper>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Top */}
+        {/* Header */}
         <View className="px-4 pt-4 pb-2">
-          <Text className="text-[32px] font-bold text-zinc-900 dark:text-white">
+          <Text className="text-[32px] font-bold text-light-text dark:text-dark-text">
             Hi, Alex 👋
           </Text>
 
           <View className="mt-2 flex-row items-center">
-            <Ionicons name="location-sharp" size={18} color="#6b7280" />
+            <Ionicons name="location-sharp" size={18} color="#9CA3AF" />
             <Pressable className="flex-row items-center ml-1">
-              <Text className="text-zinc-600 dark:text-zinc-400 mr-1">
+              <Text className="text-light-muted dark:text-dark-muted mr-1">
                 Hyderabad, India
               </Text>
-              <Ionicons name="chevron-down" size={16} color="#6b7280" />
+              <Ionicons name="chevron-down" size={16} color="#9CA3AF" />
             </Pressable>
           </View>
         </View>
 
         {/* Quick Actions */}
         <View className="px-4 mt-4">
-          <View className="flex-row justify-between gap-1">
-            {/* History Button */}
+          <View className="flex-row justify-between gap-2">
             <Pressable
-              className="w-[32%] rounded-xl bg-white dark:bg-white border border-zinc-200 dark:border-zinc-800 p-5 items-center shadow-sm"
+              className="w-[32%] rounded-xl bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border p-5 items-center shadow-sm"
               onPress={() => router.push("/(tabs)/tournaments")}
               android_ripple={{
                 color: Platform.OS === "android" ? "#00000022" : undefined,
               }}
             >
-              <MaterialIcons name="history" size={30} color="#0047D4" />
-              <Text className="text-sm font-semibold text-zinc-900 dark:text-black mt-2">
+              <MaterialIcons name="history" size={30} color="#8AFF1A" />
+              <Text className="text-sm font-semibold text-light-text dark:text-dark-text mt-2">
                 History
               </Text>
             </Pressable>
 
-            {/* Players Button */}
             <Pressable
-              className="w-[32%] rounded-xl bg-white dark:bg-white border border-zinc-200 dark:border-zinc-800 p-5 items-center shadow-sm"
+              className="w-[32%] rounded-xl bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border p-5 items-center shadow-sm"
               onPress={() => router.push("/payments")}
-              android_ripple={{
-                color: Platform.OS === "android" ? "#00000022" : undefined,
-              }}
             >
               <MaterialIcons
                 name="account-balance-wallet"
                 size={30}
-                color="#0047D4"
+                color="#8AFF1A"
               />
-              <Text className="text-sm font-semibold text-zinc-900 dark:text-black mt-2">
+              <Text className="text-sm font-semibold text-light-text dark:text-dark-text mt-2">
                 Payments
               </Text>
             </Pressable>
 
-            {/* Schedule Button */}
-            <Pressable
-              className="w-[32%] rounded-xl bg-white dark:bg-white border border-zinc-200 dark:border-zinc-800 p-5 items-center shadow-sm"
-              android_ripple={{
-                color: Platform.OS === "android" ? "#00000022" : undefined,
-              }}
-            >
-              <MaterialIcons name="event-available" size={30} color="#0047D4" />
-              <Text className="text-sm font-semibold text-zinc-900 dark:text-black mt-2">
-                Schedule
+            <Pressable className="w-[32%] rounded-xl bg-light-card dark:bg-dark-card border border-light-border dark:border-dark-border p-5 items-center shadow-sm">
+              <MaterialIcons name="event-available" size={30} color="#8AFF1A" />
+              <Text className="text-sm font-semibold text-light-text dark:text-dark-text mt-2">
+                Create
               </Text>
             </Pressable>
           </View>
@@ -224,6 +219,6 @@ export default function HomeScreen() {
         <TournamentSection title="Upcoming" data={upcomingData} />
         <TournamentSection title="Finished" data={finishedData} />
       </ScrollView>
-    </SafeAreaView>
+    </ScreenWrapper>
   );
 }
